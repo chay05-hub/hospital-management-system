@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Patients</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { overflow-x: hidden; }
+        .wrapper { display: flex; width: 100%; min-height: 100vh; }
+        .content { flex-grow: 1; min-height: 100vh; }
+    </style>
+</head>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <div class="content p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Patient List</h2>
+                <a href="/patients/add" class="btn btn-primary">+ Add Patient</a>
+            </div>
+            
+            <div class="card bg-white p-3 shadow-sm rounded border-0">
+                <table class="table table-hover table-bordered mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Age/Gender</th>
+                            <th>Contact</th>
+                            <th>Blood Group</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${patients}">
+                            <td th:text="${p.id}">1</td>
+                            <td th:text="${p.name}">Name</td>
+                            <td th:text="${p.age + ' / ' + p.gender}">Age/Gender</td>
+                            <td th:text="${p.contact}">Contact</td>
+                            <td th:text="${p.bloodGroup}">Blood Group</td>
+                            <td>
+                                <a th:href="@{/patients/edit/{id}(id=${p.id})}" class="btn btn-sm btn-warning">Edit</a>
+                                <a th:href="@{/patients/delete/{id}(id=${p.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this patient?');">Delete</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(patients)}">
+                            <td colspan="6" class="text-center text-muted">No patients found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
