@@ -1,0 +1,212 @@
+<div th:fragment="chatbot">
+    <style>
+        .chat-widget-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+        .chat-widget-btn:hover {
+            transform: scale(1.1);
+        }
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 450px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transform: scale(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-in-out;
+        }
+        .chat-window.active {
+            transform: scale(1);
+        }
+        .chat-header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header h5 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .close-chat {
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        .chat-message.bot {
+            justify-content: flex-start;
+        }
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+        .message-content {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+        .bot .message-content {
+            background-color: #e9ecef;
+            color: #212529;
+            border-bottom-left-radius: 0;
+        }
+        .user .message-content {
+            background-color: #0d6efd;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        .chat-footer {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+        }
+        .chat-input {
+            flex: 1;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            padding: 8px 15px;
+            outline: none;
+        }
+        .chat-send-btn {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-send-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+            transform: translateX(1px); /* Slight adjustment for visual center */
+        }
+    </style>
+
+    <!-- Chat Button -->
+    <div class="chat-widget-btn" id="chatToggleBtn" onclick="toggleChat()">
+        💬
+    </div>
+
+    <!-- Chat Window -->
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <h5>Hospital Assistant</h5>
+            <span class="close-chat" onclick="toggleChat()">&times;</span>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-message bot">
+                <div class="message-content">
+                    Hello! I'm your virtual hospital assistant. How can I help you navigate the system today?
+                </div>
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button class="chat-send-btn" onclick="sendMessage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('active');
+            
+            // Focus input when opened
+            if (chatWindow.classList.contains('active')) {
+                setTimeout(() => {
+                    document.getElementById('chatInput').focus();
+                }, 300);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById('chatInput');
+            const messageText = inputField.value.trim();
+            if (messageText === '') return;
+
+            appendMessage(messageText, 'user');
+            inputField.value = '';
+
+            // Dummy bot responses
+            const lowerMessage = messageText.toLowerCase();
+            let botReply = "I'm a simple UI assistant! I can help you find things on the dashboard. Would you like to see patients or doctors?";
+            
+            if (lowerMessage.includes("patient")) botReply = "You can manage patients by clicking 'Patients' in the sidebar menu.";
+            if (lowerMessage.includes("doctor")) botReply = "Need to view doctors? the 'Doctors' tab on the left handles all staff management.";
+            if (lowerMessage.includes("help") || lowerMessage.includes("support")) botReply = "If you need technical support for this dashboard, please contact the IT department.";
+            if (lowerMessage.includes("hi") || lowerMessage.includes("hello")) botReply = "Hello there! What can I show you today?";
+
+            setTimeout(() => {
+                appendMessage(botReply, 'bot');
+            }, 800);
+        }
+
+        function appendMessage(text, sender) {
+            const chatBody = document.getElementById('chatBody');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            messageDiv.appendChild(contentDiv);
+            chatBody.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    </script>
+</div>
